@@ -157,13 +157,16 @@ namespace Auth.API.Services
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("userName", user.UserName),
-                new Claim(ClaimTypes.Role, "User")
-            };
+           
+
+   var claims = new[]
+{
+    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+    new Claim(ClaimTypes.Email, user.Email),
+    new Claim("userName", user.UserName),
+    new Claim(ClaimTypes.Role, "User")
+
+};
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
