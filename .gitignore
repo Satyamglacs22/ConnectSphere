@@ -168,6 +168,8 @@ nCrunchTemp_*
 *.mm.*
 AutoTest.Net/
 
+**/appsettings.Development.json
+
 # Web workbench (sass)
 .sass-cache/
 
