@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Auth.API/Auth.API.csproj" />
+  <Project Path="Like.API/Like.API.csproj" />
   <Project Path="Post.API/Post.API.csproj" />
 </Solution>
