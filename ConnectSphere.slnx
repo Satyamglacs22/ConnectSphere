@@ -3,6 +3,7 @@
   <Project Path="Comment.API/Comment.API.csproj" />
   <Project Path="Feed.API/Feed.API.csproj" />
   <Project Path="Follow.API/Follow.API.csproj" />
+  <Project Path="Gateway/Gateway.csproj" />
   <Project Path="Like.API/Like.API.csproj" />
   <Project Path="Notification.API/Notification.API.csproj" />
   <Project Path="Post.API/Post.API.csproj" />
