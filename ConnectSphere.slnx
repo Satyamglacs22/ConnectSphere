@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="Auth.API/Auth.API.csproj" />
   <Project Path="Comment.API/Comment.API.csproj" />
+  <Project Path="ConnectSphere.Tests/ConnectSphere.Tests.csproj" />
   <Project Path="Feed.API/Feed.API.csproj" />
   <Project Path="Follow.API/Follow.API.csproj" />
   <Project Path="Gateway/Gateway.csproj" />
