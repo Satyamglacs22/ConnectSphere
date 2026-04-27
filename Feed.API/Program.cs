@@ -22,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
+    .Enrich.WithProperty("Service", "Feed.API") // change per service
     .CreateLogger();
 
 builder.Host.UseSerilog();

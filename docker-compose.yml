@@ -1,0 +1,279 @@
+version: "3.9"
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: connectsphere-sqlserver
+    environment:
+      SA_PASSWORD: "ConnectSphere@2026!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - connectsphere-network
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: connectsphere-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - connectsphere-network
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: connectsphere-redis
+    command: redis-server --requirepass redis123
+    ports:
+      - "6379:6379"
+    networks:
+      - connectsphere-network
+    restart: always
+
+  auth-api:
+    build:
+      context: ./Auth.API
+    image: connectsphere-auth-api
+    container_name: connectsphere-auth
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5246
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Auth;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+    ports:
+      - "5246:5246"
+    depends_on:
+      - sqlserver
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  post-api:
+    build:
+      context: ./Post.API
+    image: connectsphere-post-api
+    container_name: connectsphere-post
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5247
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Post;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - Services__AuthAPI=http://auth-api:5246
+    ports:
+      - "5247:5247"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_started
+      auth-api:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  feed-api:
+    build:
+      context: ./Feed.API
+    image: connectsphere-feed-api
+    container_name: connectsphere-feed
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5252
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Feed;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - Redis__ConnectionString=redis:6379,password=redis123
+      - Services__PostAPI=http://post-api:5247
+      - Services__FollowAPI=http://follow-api:5250
+    ports:
+      - "5252:5252"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      sqlserver:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  comment-api:
+    build:
+      context: ./Comment.API
+    image: connectsphere-comment-api
+    container_name: connectsphere-comment
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5249
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Comment;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - Services__PostAPI=http://post-api:5247
+      - Services__AuthAPI=http://auth-api:5246
+      - Services__NotificationAPI=http://notification-api:5251
+    ports:
+      - "5249:5249"
+    depends_on:
+      sqlserver:
+        condition: service_started
+      post-api:
+        condition: service_started
+      auth-api:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  like-api:
+    build:
+      context: ./Like.API
+    image: connectsphere-like-api
+    container_name: connectsphere-like
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5248
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Like;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - Services__PostAPI=http://post-api:5247
+      - Services__NotificationAPI=http://notification-api:5251
+    ports:
+      - "5248:5248"
+    depends_on:
+      sqlserver:
+        condition: service_started
+      post-api:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  follow-api:
+    build:
+      context: ./Follow.API
+    image: connectsphere-follow-api
+    container_name: connectsphere-follow
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5250
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Follow;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - Services__AuthAPI=http://auth-api:5246
+      - Services__NotificationAPI=http://notification-api:5251
+    ports:
+      - "5250:5250"
+    depends_on:
+      sqlserver:
+        condition: service_started
+      auth-api:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  notification-api:
+    build:
+      context: ./Notification.API
+    image: connectsphere-notification-api
+    container_name: connectsphere-notification
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5251
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Notification;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+    ports:
+      - "5251:5251"
+    depends_on:
+      sqlserver:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  gateway:
+    build:
+      context: ./Gateway
+    image: connectsphere-gateway
+    container_name: connectsphere-gateway
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+      - ReverseProxy__Clusters__auth-cluster__Destinations__auth-destination__Address=http://auth-api:5246
+      - ReverseProxy__Clusters__post-cluster__Destinations__post-destination__Address=http://post-api:5247
+      - ReverseProxy__Clusters__feed-cluster__Destinations__feed-destination__Address=http://feed-api:5252
+      - ReverseProxy__Clusters__like-cluster__Destinations__like-destination__Address=http://like-api:5248
+      - ReverseProxy__Clusters__comment-cluster__Destinations__comment-destination__Address=http://comment-api:5249
+      - ReverseProxy__Clusters__follow-cluster__Destinations__follow-destination__Address=http://follow-api:5250
+      - ReverseProxy__Clusters__notification-cluster__Destinations__notification-destination__Address=http://notification-api:5251
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-api
+      - post-api
+      - feed-api
+      - like-api
+      - comment-api
+      - follow-api
+      - notification-api
+    networks:
+      - connectsphere-network
+    restart: always
+
+# 🔹 Volumes
+volumes:
+  sqlserver-data:
+  dataprotection-keys:
+
+# 🔹 Network
+networks:
+  connectsphere-network:
+    driver: bridge
