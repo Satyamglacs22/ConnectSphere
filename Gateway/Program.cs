@@ -1,4 +1,5 @@
 using System.Text;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -10,10 +11,20 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
     .WriteTo.Seq("http://localhost:5341")
-    .Enrich.WithProperty("Service", "Gateway") // change per service
+    .Enrich.WithProperty("Service", "Gateway")
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+// ── Rate Limiting ──────────────────────────────────────────────────────────
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(
+    builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(
+    builder.Configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration,
+    RateLimitConfiguration>();
 
 // ── YARP Reverse Proxy ─────────────────────────────────────────────────────
 builder.Services.AddReverseProxy()
@@ -44,43 +55,83 @@ builder.Services.AddAuthorization();
 // ── CORS ───────────────────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy
+            .WithOrigins(
+                "http://localhost:3000",  // React
+                "http://localhost:4200",  // Angular
+                "http://localhost:5173"   // Vite
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ────────────────────────────────────────────────────
-app.UseSerilogRequestLogging();
+// ── Security Headers Middleware ────────────────────────────────────────────
+app.Use(async (context, next) =>
+{
+    // Prevent clickjacking
+    context.Response.Headers.Append(
+        "X-Frame-Options", "DENY");
 
-app.UseCors("AllowAll");
+    // Prevent XSS attacks
+    context.Response.Headers.Append(
+        "X-Content-Type-Options", "nosniff");
 
+    // XSS Protection
+    context.Response.Headers.Append(
+        "X-XSS-Protection", "1; mode=block");
+
+    // Referrer Policy
+    context.Response.Headers.Append(
+        "Referrer-Policy", "no-referrer");
+
+    // Content Security Policy
+    context.Response.Headers.Append(
+        "Content-Security-Policy",
+        "default-src 'self'");
+
+    await next();
+});
+
+// ── Rate Limiting ──────────────────────────────────────────────────────────
+app.UseIpRateLimiting();
+
+// ── Request Logging ────────────────────────────────────────────────────────
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate =
+        "HTTP {RequestMethod} {RequestPath} → {StatusCode} ({Elapsed:0.0000}ms)";
+});
+
+// ── CORS ───────────────────────────────────────────────────────────────────
+app.UseCors("AllowFrontend");
+
+// ── Auth ───────────────────────────────────────────────────────────────────
 app.UseAuthentication();
 app.UseAuthorization();
-
-// ── YARP Routes ────────────────────────────────────────────────────────────
-app.MapReverseProxy();
 
 // ── Health Check ───────────────────────────────────────────────────────────
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "Healthy",
-    gateway = "YARP",
+    gateway = "YARP + Security",
     timestamp = DateTime.UtcNow,
-    services = new[]
+    features = new[]
     {
-        "Auth API    → http://localhost:5246",
-        "Post API    → http://localhost:5247",
-        "Like API    → http://localhost:5248",
-        "Comment API → http://localhost:5249",
-        "Follow API  → http://localhost:5250",
-        "Notif API   → http://localhost:5251",
-        "Feed API    → http://localhost:5252"
+        "Rate Limiting ✅",
+        "Security Headers ✅",
+        "CORS Policy ✅",
+        "JWT Auth ✅",
+        "Request Logging ✅"
     }
 }));
+
+// ── YARP Routes ────────────────────────────────────────────────────────────
+app.MapReverseProxy();
 
 app.Run();
