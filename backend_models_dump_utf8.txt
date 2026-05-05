@@ -1,0 +1,155 @@
+﻿
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\DTOs\ChangePasswordDto.cs ===
+
+Auth.API\DTOs\ChangePasswordDto.cs:8:        public string CurrentPassword { get; set; } = string.Empty;
+Auth.API\DTOs\ChangePasswordDto.cs:12:        public string NewPassword { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\DTOs\LoginDto.cs ===
+Auth.API\DTOs\LoginDto.cs:9:        public string Email { get; set; } = string.Empty;
+Auth.API\DTOs\LoginDto.cs:12:        public string Password { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\DTOs\RegisterDto.cs ===
+Auth.API\DTOs\RegisterDto.cs:9:        public string UserName { get; set; } = string.Empty;
+Auth.API\DTOs\RegisterDto.cs:13:        public string FullName { get; set; } = string.Empty;
+Auth.API\DTOs\RegisterDto.cs:17:        public string Email { get; set; } = string.Empty;
+Auth.API\DTOs\RegisterDto.cs:21:        public string Password { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\DTOs\UpdateCounterDto.cs ===
+Auth.API\DTOs\UpdateCounterDto.cs:8:        public string Field { get; set; } = string.Empty;  // FollowerCount, 
+FollowingCount, PostCount
+Auth.API\DTOs\UpdateCounterDto.cs:11:        public int Delta { get; set; }  // +1 or -1
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\DTOs\UpdateProfileDto.cs ===
+Auth.API\DTOs\UpdateProfileDto.cs:8:        public string? FullName { get; set; }
+Auth.API\DTOs\UpdateProfileDto.cs:11:        public string? Bio { get; set; }
+Auth.API\DTOs\UpdateProfileDto.cs:14:        public string? AvatarUrl { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Comment.API\DTOs\AddCommentDto.cs ===
+Comment.API\DTOs\AddCommentDto.cs:8:        public int PostId { get; set; }
+Comment.API\DTOs\AddCommentDto.cs:11:        public int UserId { get; set; }
+Comment.API\DTOs\AddCommentDto.cs:14:        public string Content { get; set; } = string.Empty;
+Comment.API\DTOs\AddCommentDto.cs:17:        public int? ParentCommentId { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Comment.API\DTOs\CommentResponseDto.cs ===
+Comment.API\DTOs\CommentResponseDto.cs:5:        public int CommentId { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:6:        public int PostId { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:7:        public int UserId { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:8:        public int? ParentCommentId { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:11:        public string Content { get; set; } = string.Empty;
+Comment.API\DTOs\CommentResponseDto.cs:13:        public int LikeCount { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:14:        public int ReplyCount { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:15:        public bool IsEdited { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:16:        public DateTime CreatedAt { get; set; }
+Comment.API\DTOs\CommentResponseDto.cs:17:        public DateTime? EditedAt { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Comment.API\DTOs\EditCommentDto.cs ===
+Comment.API\DTOs\EditCommentDto.cs:8:        public string Content { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Comment.API\DTOs\IncrementCountDto.cs ===
+Comment.API\DTOs\IncrementCountDto.cs:8:        public string Field { get; set; } = string.Empty;
+Comment.API\DTOs\IncrementCountDto.cs:11:        public int Delta { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Feed.API\DTOs\FeedResponseDto.cs ===
+Feed.API\DTOs\FeedResponseDto.cs:5:        public int FeedItemId { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:6:        public int UserId { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:7:        public int PostId { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:8:        public int AuthorId { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:9:        public bool IsSeen { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:10:        public DateTime CreatedAt { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:13:        public string? Content { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:14:        public string? MediaUrl { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:15:        public string? Hashtags { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:16:        public int LikeCount { get; set; }
+Feed.API\DTOs\FeedResponseDto.cs:17:        public int CommentCount { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Follow.API\DTOs\FollowRequestDto.cs ===
+Follow.API\DTOs\FollowRequestDto.cs:8:        public int FollowerId { get; set; }
+Follow.API\DTOs\FollowRequestDto.cs:11:        public int FolloweeId { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Follow.API\DTOs\FollowResponseDto.cs ===
+Follow.API\DTOs\FollowResponseDto.cs:5:        public int FollowId { get; set; }
+Follow.API\DTOs\FollowResponseDto.cs:6:        public int FollowerId { get; set; }
+Follow.API\DTOs\FollowResponseDto.cs:7:        public int FolloweeId { get; set; }
+Follow.API\DTOs\FollowResponseDto.cs:8:        public string Status { get; set; } = string.Empty;
+Follow.API\DTOs\FollowResponseDto.cs:9:        public DateTime CreatedAt { get; set; }
+Follow.API\DTOs\FollowResponseDto.cs:10:        public string Message { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Follow.API\DTOs\MutualFollowersDto.cs ===
+Follow.API\DTOs\MutualFollowersDto.cs:5:        public int UserAId { get; set; }
+Follow.API\DTOs\MutualFollowersDto.cs:6:        public int UserBId { get; set; }
+Follow.API\DTOs\MutualFollowersDto.cs:7:        public IList<int> MutualFollowerIds { get; set; } = new List<int>();
+Follow.API\DTOs\MutualFollowersDto.cs:8:        public int MutualCount { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Like.API\DTOs\ToggleLikeDto.cs ===
+Like.API\DTOs\ToggleLikeDto.cs:8:        public int UserId { get; set; }
+Like.API\DTOs\ToggleLikeDto.cs:11:        public int TargetId { get; set; }
+Like.API\DTOs\ToggleLikeDto.cs:15:        public string TargetType { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Like.API\DTOs\ToggleLikeResponseDto.cs ===
+Like.API\DTOs\ToggleLikeResponseDto.cs:6:        public bool Liked { get; set; }
+Like.API\DTOs\ToggleLikeResponseDto.cs:7:        public int LikeCount { get; set; }
+Like.API\DTOs\ToggleLikeResponseDto.cs:8:        public string Message { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\BroadcastNotificationDto.cs ===
+Notification.API\DTOs\BroadcastNotificationDto.cs:8:        public IList<int> UserIds { get; set; } = new List<int>();
+Notification.API\DTOs\BroadcastNotificationDto.cs:11:        public string Title { get; set; } = string.Empty;
+Notification.API\DTOs\BroadcastNotificationDto.cs:14:        public string Message { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\CommentNotificationDto.cs ===
+Notification.API\DTOs\CommentNotificationDto.cs:8:        public int PostAuthorId { get; set; }
+Notification.API\DTOs\CommentNotificationDto.cs:11:        public int ActorId { get; set; }
+Notification.API\DTOs\CommentNotificationDto.cs:14:        public int PostId { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\FollowNotificationDto.cs ===
+Notification.API\DTOs\FollowNotificationDto.cs:8:        public int TargetId { get; set; }
+Notification.API\DTOs\FollowNotificationDto.cs:11:        public int FollowerId { get; set; }
+Notification.API\DTOs\FollowNotificationDto.cs:14:        public string Type { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\LikeNotificationDto.cs ===
+Notification.API\DTOs\LikeNotificationDto.cs:8:        public int RecipientId { get; set; }
+Notification.API\DTOs\LikeNotificationDto.cs:11:        public int ActorId { get; set; }
+Notification.API\DTOs\LikeNotificationDto.cs:14:        public int TargetId { get; set; }
+Notification.API\DTOs\LikeNotificationDto.cs:17:        public string TargetType { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\MentionNotificationDto.cs ===
+Notification.API\DTOs\MentionNotificationDto.cs:8:        public int MentionedUserId { get; set; }
+Notification.API\DTOs\MentionNotificationDto.cs:11:        public int ActorId { get; set; }
+Notification.API\DTOs\MentionNotificationDto.cs:14:        public int PostId { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\NotificationResponseDto.cs ===
+Notification.API\DTOs\NotificationResponseDto.cs:5:        public int NotificationId { get; set; }
+Notification.API\DTOs\NotificationResponseDto.cs:6:        public int RecipientId { get; set; }
+Notification.API\DTOs\NotificationResponseDto.cs:7:        public int ActorId { get; set; }
+Notification.API\DTOs\NotificationResponseDto.cs:8:        public string Type { get; set; } = string.Empty;
+Notification.API\DTOs\NotificationResponseDto.cs:9:        public string Message { get; set; } = string.Empty;
+Notification.API\DTOs\NotificationResponseDto.cs:10:        public int TargetId { get; set; }
+Notification.API\DTOs\NotificationResponseDto.cs:11:        public string TargetType { get; set; } = string.Empty;
+Notification.API\DTOs\NotificationResponseDto.cs:12:        public bool IsRead { get; set; }
+Notification.API\DTOs\NotificationResponseDto.cs:13:        public DateTime CreatedAt { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\DTOs\SendNotificationDto.cs ===
+Notification.API\DTOs\SendNotificationDto.cs:8:        public int RecipientId { get; set; }
+Notification.API\DTOs\SendNotificationDto.cs:11:        public int ActorId { get; set; }
+Notification.API\DTOs\SendNotificationDto.cs:14:        public string Type { get; set; } = string.Empty;
+Notification.API\DTOs\SendNotificationDto.cs:17:        public string Message { get; set; } = string.Empty;
+Notification.API\DTOs\SendNotificationDto.cs:19:        public int TargetId { get; set; }
+Notification.API\DTOs\SendNotificationDto.cs:21:        public string TargetType { get; set; } = string.Empty;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Post.API\DTOs\CreatePostDto.cs ===
+Post.API\DTOs\CreatePostDto.cs:8:        public int UserId { get; set; }
+Post.API\DTOs\CreatePostDto.cs:11:        public string Content { get; set; } = string.Empty;
+Post.API\DTOs\CreatePostDto.cs:14:        public string? MediaUrl { get; set; }
+Post.API\DTOs\CreatePostDto.cs:17:        public string? MediaType { get; set; }
+Post.API\DTOs\CreatePostDto.cs:20:        public string Visibility { get; set; } = "PUBLIC";
+Post.API\DTOs\CreatePostDto.cs:23:        public string? Hashtags { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Post.API\DTOs\IncrementCountDto.cs ===
+Post.API\DTOs\IncrementCountDto.cs:9:        public string Field { get; set; } = string.Empty;
+Post.API\DTOs\IncrementCountDto.cs:13:        public int Delta { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Post.API\DTOs\updatePostDto.cs ===
+Post.API\DTOs\updatePostDto.cs:8:        public string Content { get; set; } = string.Empty;
+Post.API\DTOs\updatePostDto.cs:10:        public string? Hashtags { get; set; }
+Post.API\DTOs\updatePostDto.cs:12:        public string Visibility { get; set; } = "PUBLIC";
+
+

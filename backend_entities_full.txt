@@ -1,0 +1,99 @@
+﻿
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\Entities\AuditLog.cs ===
+
+        public int AuditLogId { get; set; }
+        public int ActorId { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public int TargetId { get; set; }
+        public string TargetType { get; set; } = string.Empty;
+        public string? Before { get; set; }
+        public string? After { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Auth.API\Entities\User.cs ===
+        public int UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
+        public string? Bio { get; set; }
+        public string? AvatarUrl { get; set; }
+        public bool IsPrivate { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+        public int FollowerCount { get; set; } = 0;
+        public int FollowingCount { get; set; } = 0;
+        public int PostCount { get; set; } = 0;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Comment.API\Entities\CommentEntity.cs ===
+        public int CommentId { get; set; }
+        public int PostId { get; set; }
+        public int UserId { get; set; }
+        public int? ParentCommentId { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public int LikeCount { get; set; } = 0;
+        public int ReplyCount { get; set; } = 0;
+        public bool IsDeleted { get; set; } = false;
+        public bool IsEdited { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? EditedAt { get; set; }
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Feed.API\Entities\FeedItemEntity.cs ===
+        public int FeedItemId { get; set; }
+        public int UserId { get; set; }
+        public int PostId { get; set; }
+        public int AuthorId { get; set; }
+        public bool IsSeen { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Follow.API\Entities\FollowEntity.cs ===
+        public int FollowId { get; set; }
+        public int FollowerId { get; set; }
+        public int FolloweeId { get; set; }
+        public string Status { get; set; } = "PENDING";
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Like.API\Entities\LikeEntity.cs ===
+        public int LikeId { get; set; }
+        public int UserId { get; set; }
+        public int TargetId { get; set; }
+        public string TargetType { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Notification.API\Entities\NotificationEntity.cs ===
+        public int NotificationId { get; set; }
+        public int RecipientId { get; set; }
+        public int ActorId { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public int TargetId { get; set; }
+        public string TargetType { get; set; } = string.Empty;
+        public bool IsRead { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Post.API\Entities\AuditLog.cs ===
+        public int AuditLogId { get; set; }
+        public int ActorId { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public int TargetId { get; set; }
+        public string TargetType { get; set; } = string.Empty;
+        public string? Before { get; set; }
+        public string? After { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+=== C:\Users\sk725\source\repos\ConnectSphere\Post.API\Entities\PostEntity.cs ===
+        public int PostId { get; set; }
+        public int UserId { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public string? MediaUrl { get; set; }
+        public string? MediaType { get; set; }
+        public string Visibility { get; set; } = "PUBLIC";
+        public string? Hashtags { get; set; }
+        public int LikeCount { get; set; } = 0;
+        public int CommentCount { get; set; } = 0;
+        public int ShareCount { get; set; } = 0;
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+
+

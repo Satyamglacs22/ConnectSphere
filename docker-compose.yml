@@ -226,8 +226,32 @@ services:
       - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
       - Jwt__Issuer=ConnectSphere
       - Jwt__Audience=ConnectSphereUsers
+      - Services__AuthAPI=http://auth-api:5246
     ports:
       - "5251:5251"
+    depends_on:
+      sqlserver:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - connectsphere-network
+    restart: always
+
+  bookmark-api:
+    build:
+      context: ./Bookmark.API
+    image: connectsphere-bookmark-api
+    container_name: connectsphere-bookmark
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5253
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ConnectSphere_Bookmark;User Id=sa;Password=ConnectSphere@2026!;TrustServerCertificate=True;
+      - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
+      - Jwt__Issuer=ConnectSphere
+      - Jwt__Audience=ConnectSphereUsers
+    ports:
+      - "5253:5253"
     depends_on:
       sqlserver:
         condition: service_started
@@ -243,6 +267,7 @@ services:
     image: connectsphere-gateway
     container_name: connectsphere-gateway
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - Jwt__Key=ThisIsASuperSecretKeyForConnectSphere2026!
       - Jwt__Issuer=ConnectSphere
@@ -254,6 +279,7 @@ services:
       - ReverseProxy__Clusters__comment-cluster__Destinations__comment-destination__Address=http://comment-api:5249
       - ReverseProxy__Clusters__follow-cluster__Destinations__follow-destination__Address=http://follow-api:5250
       - ReverseProxy__Clusters__notification-cluster__Destinations__notification-destination__Address=http://notification-api:5251
+      - ReverseProxy__Clusters__bookmark-cluster__Destinations__bookmark-destination__Address=http://bookmark-api:5253
     ports:
       - "8080:8080"
     depends_on:
@@ -264,9 +290,12 @@ services:
       - comment-api
       - follow-api
       - notification-api
+      - bookmark-api
     networks:
       - connectsphere-network
     restart: always
+
+
 
 # 🔹 Volumes
 volumes:
