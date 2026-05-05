@@ -26,11 +26,19 @@ namespace Post.API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+                    ?? User.FindFirst("sub");
+                if (userIdClaim == null) return Unauthorized();
+                int userId = int.Parse(userIdClaim.Value);
+
                 var post = new PostEntity
                 {
-                    UserId = dto.UserId,
+                    UserId = userId,
                     Content = dto.Content,
-                    MediaUrl = dto.MediaUrl,
+                    MediaUrl = dto.MediaUrls?.FirstOrDefault() ?? dto.MediaUrl,
+                    AdditionalMediaUrls = (dto.MediaUrls?.Count > 1) 
+                        ? string.Join("|", dto.MediaUrls.Skip(1)) 
+                        : null,
                     MediaType = dto.MediaType,
                     Visibility = dto.Visibility,
                     Hashtags = dto.Hashtags
@@ -56,9 +64,9 @@ namespace Post.API.Controllers
 
         // GET /api/posts/user/{userId}
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUser(int userId)
+        public async Task<IActionResult> GetByUser(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var posts = await _postService.GetPostsByUser(userId);
+            var posts = await _postService.GetPostsByUser(userId, page, pageSize);
             return Ok(posts);
         }
 

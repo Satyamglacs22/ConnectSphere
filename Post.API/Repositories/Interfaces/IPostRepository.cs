@@ -5,7 +5,7 @@ namespace Post.API.Repositories.Interfaces
     public interface IPostRepository
     {
         Task<PostEntity?> FindByPostId(int id);
-        Task<IList<PostEntity>> FindByUserId(int userId);
+        Task<IList<PostEntity>> FindByUserId(int userId, int page = 1, int pageSize = 10);
         Task<IList<PostEntity>> FindFeedForUser(int userId, IList<int> followingIds);
         Task<IList<PostEntity>> FindByHashtag(string hashtag);
         Task<IList<PostEntity>> FindPublic();

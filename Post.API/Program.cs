@@ -140,6 +140,12 @@ builder.Services.AddHealthChecks()
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
 
+// ── Max Request Body Size (e.g. 100MB for Video) ───────────────────────────
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024;
+});
+
 var app = builder.Build();
 
 // ── Middleware Pipeline ────────────────────────────────────────────────────
@@ -149,7 +155,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// ── Database Setup ────────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
+    db.Database.EnsureCreated();
+    
+    // Quick fix to add column if it doesn't exist (since EnsureCreated doesn't update schema)
+    try
+    {
+        db.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Posts') AND name = 'AdditionalMediaUrls') " +
+                                 "ALTER TABLE Posts ADD AdditionalMediaUrls NVARCHAR(MAX) NULL;");
+    }
+    catch { /* Ignore error if column exists or table doesn't support it */ }
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

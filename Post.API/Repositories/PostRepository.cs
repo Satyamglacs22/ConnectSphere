@@ -20,11 +20,13 @@ namespace Post.API.Repositories
                 .FirstOrDefaultAsync(p => p.PostId == id && !p.IsDeleted);
         }
 
-        public async Task<IList<PostEntity>> FindByUserId(int userId)
+        public async Task<IList<PostEntity>> FindByUserId(int userId, int page = 1, int pageSize = 10)
         {
             return await _context.Posts
                 .Where(p => p.UserId == userId && !p.IsDeleted)
                 .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 
@@ -69,23 +71,17 @@ namespace Post.API.Repositories
 
         public async Task IncrementCount(int postId, string field, int delta)
         {
+            var post = await _context.Posts.FindAsync(postId);
+            if (post == null) return;
+
             if (field == "LikeCount")
-                await _context.Posts
-                    .Where(p => p.PostId == postId)
-                    .ExecuteUpdateAsync(s => s.SetProperty(
-                        p => p.LikeCount, p => p.LikeCount + delta));
-
+                post.LikeCount = Math.Max(0, post.LikeCount + delta);
             else if (field == "CommentCount")
-                await _context.Posts
-                    .Where(p => p.PostId == postId)
-                    .ExecuteUpdateAsync(s => s.SetProperty(
-                        p => p.CommentCount, p => p.CommentCount + delta));
-
+                post.CommentCount = Math.Max(0, post.CommentCount + delta);
             else if (field == "ShareCount")
-                await _context.Posts
-                    .Where(p => p.PostId == postId)
-                    .ExecuteUpdateAsync(s => s.SetProperty(
-                        p => p.ShareCount, p => p.ShareCount + delta));
+                post.ShareCount = Math.Max(0, post.ShareCount + delta);
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IList<PostEntity>> FindTrending(int topN)

@@ -6,7 +6,7 @@ namespace Post.API.Services.Interfaces
     {
         Task<PostEntity> CreatePost(PostEntity post);
         Task<PostEntity?> GetPostById(int id);
-        Task<IList<PostEntity>> GetPostsByUser(int userId);
+        Task<IList<PostEntity>> GetPostsByUser(int userId, int page = 1, int pageSize = 10);
         Task<IList<PostEntity>> GetFeed(int userId, IList<int> followingIds);
         Task<IList<PostEntity>> GetPublicPosts();
         Task<PostEntity> UpdatePost(int id, int requestingUserId, string content, string? hashtags, string visibility);

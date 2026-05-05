@@ -19,6 +19,8 @@ namespace Post.API.DTOs
         // PUBLIC, FOLLOWERS, PRIVATE
         public string Visibility { get; set; } = "PUBLIC";
 
+        public List<string>? MediaUrls { get; set; }
+
         // Comma-separated hashtags: '#travel,#food'
         public string? Hashtags { get; set; }
     }

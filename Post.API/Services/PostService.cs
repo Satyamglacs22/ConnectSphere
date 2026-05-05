@@ -56,9 +56,9 @@ namespace Post.API.Services
             return await _repo.FindByPostId(id);
         }
 
-        public async Task<IList<PostEntity>> GetPostsByUser(int userId)
+        public async Task<IList<PostEntity>> GetPostsByUser(int userId, int page = 1, int pageSize = 10)
         {
-            return await _repo.FindByUserId(userId);
+            return await _repo.FindByUserId(userId, page, pageSize);
         }
 
         public async Task<IList<PostEntity>> GetFeed(int userId, IList<int> followingIds)
