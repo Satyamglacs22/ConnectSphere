@@ -8,7 +8,7 @@ namespace Auth.API.Services.Interfaces
         Task<string> Login(string email, string password);
         Task<User?> GetUserById(int id);
         Task<User?> GetUserByUserName(string name);
-        Task<User> UpdateProfile(int id, string? fullName, string? bio);
+        Task<User> UpdateProfile(int id, string? fullName, string? bio, string? avatarUrl = null);
         Task ChangePassword(int id, string currentPassword, string newPassword);
         Task<IList<User>> SearchUsers(string q);
         Task TogglePrivacy(int id);

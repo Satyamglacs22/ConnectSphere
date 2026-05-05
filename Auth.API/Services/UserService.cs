@@ -74,13 +74,14 @@ namespace Auth.API.Services
             return await _repo.FindByUserName(name);
         }
 
-        public async Task<User> UpdateProfile(int id, string? fullName, string? bio)
+        public async Task<User> UpdateProfile(int id, string? fullName, string? bio, string? avatarUrl = null)
         {
             var user = await _repo.FindByUserId(id);
             if (user == null) throw new Exception("User not found.");
 
             if (fullName != null) user.FullName = fullName;
             if (bio != null) user.Bio = bio;
+            if (avatarUrl != null) user.AvatarUrl = avatarUrl;
 
             return await _repo.Update(user);
         }

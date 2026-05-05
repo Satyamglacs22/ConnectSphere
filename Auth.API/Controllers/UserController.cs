@@ -80,7 +80,7 @@ namespace Auth.API.Controllers
         {
             try
             {
-                var user = await _userService.UpdateProfile(id, dto.FullName, dto.Bio);
+                var user = await _userService.UpdateProfile(id, dto.FullName, dto.Bio, dto.AvatarUrl);
                 return Ok(user);
             }
             catch (Exception ex)
