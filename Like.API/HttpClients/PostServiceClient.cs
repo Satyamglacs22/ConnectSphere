@@ -23,5 +23,26 @@ namespace Like.API.HttpClients
 
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<int?> GetPostAuthorId(int postId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/posts/{postId}");
+                if (!response.IsSuccessStatusCode) return null;
+
+                var post = await response.Content.ReadFromJsonAsync<PostDto>();
+                return post?.UserId;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private class PostDto
+        {
+            public int UserId { get; set; }
+        }
     }
 }

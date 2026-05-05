@@ -56,11 +56,21 @@ namespace Like.API.Services
                     await UpdateExternalLikeCount(targetId, targetType, +1);
 
                     // Send notification (only on like, not unlike)
-                    await _notifClient.SendLikeNotification(
-                        recipientId: targetId,
-                        actorId: userId,
-                        targetId: targetId,
-                        targetType: targetType);
+                    int? authorId = null;
+                    if (targetType == "POST")
+                    {
+                        authorId = await _postClient.GetPostAuthorId(targetId);
+                    }
+                    
+                    // If we found the author AND it's not a self-like, send the notification
+                    if (authorId.HasValue && authorId.Value != userId)
+                    {
+                        await _notifClient.SendLikeNotification(
+                            recipientId: authorId.Value,
+                            actorId: userId,
+                            targetId: targetId,
+                            targetType: targetType);
+                    }
 
                     await tx.CommitAsync();
 
