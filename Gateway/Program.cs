@@ -28,7 +28,21 @@ builder.Services.AddSingleton<IRateLimitConfiguration,
 
 // ── YARP Reverse Proxy ─────────────────────────────────────────────────────
 builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
+    .ConfigureHttpClient((context, handler) =>
+    {
+        handler.SslOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true;
+    });
+
+// Increase default timeout for large media transfers
+builder.Services.AddHttpClient("YarpHttpClient")
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromMinutes(5));
+
+// ── Max Request Body Size (e.g. 100MB for Video) ───────────────────────────
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024;
+});
 
 // ── JWT Authentication ─────────────────────────────────────────────────────
 var jwtKey = builder.Configuration["Jwt:Key"]!;
@@ -58,11 +72,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:3000",  // React
-                "http://localhost:4200",  // Angular
-                "http://localhost:5173"   // Vite
-            )
+            .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -70,6 +80,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// ── Debug endpoint – expose YARP config for troubleshooting ────────────────────
+app.MapGet("/reverse-proxy-config", () =>
+{
+    var configSection = builder.Configuration.GetSection("ReverseProxy");
+    return Results.Json(configSection);
+});
 
 // ── Security Headers Middleware ────────────────────────────────────────────
 app.Use(async (context, next) =>
@@ -90,16 +107,24 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append(
         "Referrer-Policy", "no-referrer");
 
-    // Content Security Policy
+    // Content Security Policy – permissive for development
     context.Response.Headers.Append(
         "Content-Security-Policy",
-        "default-src 'self'");
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+        "font-src 'self' https://fonts.gstatic.com data:; " +
+        "img-src 'self' data: blob:; " +
+        "connect-src 'self' http://localhost:* ws://localhost:*;");
 
     await next();
 });
 
+// ── CORS ───────────────────────────────────────────────────────────────────
+app.UseCors("AllowFrontend");
+
 // ── Rate Limiting ──────────────────────────────────────────────────────────
-app.UseIpRateLimiting();
+// app.UseIpRateLimiting();
 
 // ── Request Logging ────────────────────────────────────────────────────────
 app.UseSerilogRequestLogging(options =>
@@ -107,9 +132,6 @@ app.UseSerilogRequestLogging(options =>
     options.MessageTemplate =
         "HTTP {RequestMethod} {RequestPath} → {StatusCode} ({Elapsed:0.0000}ms)";
 });
-
-// ── CORS ───────────────────────────────────────────────────────────────────
-app.UseCors("AllowFrontend");
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 app.UseAuthentication();
