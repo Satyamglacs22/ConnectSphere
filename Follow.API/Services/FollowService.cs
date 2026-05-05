@@ -34,6 +34,12 @@ namespace Follow.API.Services
                 return MapToDto(existing, "Already following this user.");
             }
 
+            // Check if blocked
+            if (await _repo.IsBlocked(followerId, followeeId))
+            {
+                throw new Exception("You cannot follow this user.");
+            }
+
             // Check if target user is private
             bool isPrivate = await _authClient.IsUserPrivate(followeeId);
 
@@ -58,7 +64,7 @@ namespace Follow.API.Services
 
             // Send notification
             string notifType = isPrivate ? "FOLLOW_REQUEST" : "NEW_FOLLOWER";
-            await _notifClient.SendFollowNotification(followeeId, followerId, notifType);
+            await _notifClient.SendFollowNotification(followeeId, followerId, notifType, created.FollowId);
 
             string message = isPrivate
                 ? "Follow request sent. Waiting for approval."
@@ -102,6 +108,9 @@ namespace Follow.API.Services
             await _notifClient.SendFollowAcceptedNotification(
                 follow.FollowerId, follow.FolloweeId);
 
+            // Resolve (delete) the original FOLLOW_REQUEST notification
+            await _notifClient.ResolveFollowRequestNotification(followId);
+
             return MapToDto(updated, "Follow request accepted.");
         }
 
@@ -115,6 +124,9 @@ namespace Follow.API.Services
 
             // Hard delete — no counter change needed
             await _repo.DeleteByFollowId(followId);
+
+            // Resolve (delete) the original FOLLOW_REQUEST notification
+            await _notifClient.ResolveFollowRequestNotification(followId);
         }
 
         public async Task<IList<FollowEntity>> GetFollowers(int userId)
@@ -135,6 +147,11 @@ namespace Follow.API.Services
         public async Task<bool> IsFollowing(int followerId, int followeeId)
         {
             return await _repo.IsFollowing(followerId, followeeId);
+        }
+
+        public async Task<FollowEntity?> GetFollowRelationship(int followerId, int followeeId)
+        {
+            return await _repo.FindByFollowerAndFollowee(followerId, followeeId);
         }
 
         public async Task<int> GetFollowerCount(int userId)
@@ -173,6 +190,81 @@ namespace Follow.API.Services
                 MutualFollowerIds = mutualIds,
                 MutualCount = mutualIds.Count
             };
+        }
+
+        // ── Blocks ──────────────────────────────────
+        public async Task BlockUser(int blockerId, int blockedId)
+        {
+            if (blockerId == blockedId) throw new Exception("You cannot block yourself.");
+
+            // Unfollow both ways
+            try { await UnfollowUser(blockerId, blockedId); } catch { }
+            try { await UnfollowUser(blockedId, blockerId); } catch { }
+
+            var block = new BlockEntity
+            {
+                BlockerId = blockerId,
+                BlockedId = blockedId
+            };
+
+            await _repo.Block(block);
+        }
+
+        public async Task UnblockUser(int blockerId, int blockedId)
+        {
+            await _repo.Unblock(blockerId, blockedId);
+        }
+
+        public async Task<bool> IsBlocked(int blockerId, int blockedId)
+        {
+            return await _repo.IsBlocked(blockerId, blockedId);
+        }
+
+        public async Task<IList<int>> GetBlockedUsers(int userId)
+        {
+            return await _repo.GetBlockedUserIds(userId);
+        }
+
+        public async Task<IList<FollowSuggestionDto>> GetFollowSuggestions(int userId, int count)
+        {
+            // 1. Get who I follow
+            var followingIds = await _repo.FindFollowingIds(userId);
+            
+            // 2. Get who they follow
+            // Key = suggested user ID, Value = list of my friends who follow them
+            var mutualMap = new Dictionary<int, List<int>>();
+
+            foreach (var friendId in followingIds)
+            {
+                var friendsOfFriend = await _repo.FindFollowingIds(friendId);
+                foreach (var suggestionId in friendsOfFriend)
+                {
+                    if (suggestionId == userId || followingIds.Contains(suggestionId))
+                        continue;
+
+                    if (!mutualMap.ContainsKey(suggestionId))
+                        mutualMap[suggestionId] = new List<int>();
+                    
+                    mutualMap[suggestionId].Add(friendId);
+                }
+            }
+
+            // 3. Filter blocked
+            var blockedIds = await _repo.GetBlockedUserIds(userId);
+            
+            var result = mutualMap
+                .Where(kvp => !blockedIds.Contains(kvp.Key))
+                .OrderByDescending(kvp => kvp.Value.Count) // Most mutual friends first
+                .Take(count)
+                .Select(kvp => new FollowSuggestionDto
+                {
+                    SuggestedUserId = kvp.Key,
+                    MutualFriendIds = kvp.Value,
+                    MutualCount = kvp.Value.Count
+                })
+                .ToList();
+
+            return result;
         }
 
         // ── Private Helper ─────────────────────────────────────────────────

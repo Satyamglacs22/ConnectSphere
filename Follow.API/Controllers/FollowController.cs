@@ -23,8 +23,12 @@ namespace Follow.API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
+                int followerId = int.Parse(userIdClaim.Value);
+
                 var result = await _followService.FollowUser(
-                    dto.FollowerId, dto.FolloweeId);
+                    followerId, dto.FolloweeId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -120,6 +124,16 @@ namespace Follow.API.Controllers
             return Ok(new { followerId, followeeId, isFollowing });
         }
 
+        // GET /api/follows/status/{followerId}/{followeeId}
+        [Authorize]
+        [HttpGet("status/{followerId}/{followeeId}")]
+        public async Task<IActionResult> GetFollowStatus(int followerId, int followeeId)
+        {
+            var entity = await _followService.GetFollowRelationship(followerId, followeeId);
+            string status = entity?.Status ?? "NONE";
+            return Ok(new { followerId, followeeId, status });
+        }
+
         // GET /api/follows/mutual/{userAId}/{userBId}
         [HttpGet("mutual/{userAId}/{userBId}")]
         public async Task<IActionResult> GetMutual(int userAId, int userBId)
@@ -142,6 +156,87 @@ namespace Follow.API.Controllers
         {
             var ids = await _followService.GetFollowingIds(userId);
             return Ok(new { userId, followingIds = ids });
+        }
+
+        // ── Blocks ──────────────────────────────────
+
+        // POST /api/follows/block/{blockedId}
+        [Authorize]
+        [HttpPost("block/{blockedId}")]
+        public async Task<IActionResult> BlockUser(int blockedId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
+                int blockerId = int.Parse(userIdClaim.Value);
+
+                await _followService.BlockUser(blockerId, blockedId);
+                return Ok(new { message = "User blocked." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE /api/follows/block/{blockedId}
+        [Authorize]
+        [HttpDelete("block/{blockedId}")]
+        public async Task<IActionResult> UnblockUser(int blockedId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
+                int blockerId = int.Parse(userIdClaim.Value);
+
+                await _followService.UnblockUser(blockerId, blockedId);
+                return Ok(new { message = "User unblocked." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // GET /api/follows/isBlocked/{userId}
+        [Authorize]
+        [HttpGet("isBlocked/{userId}")]
+        public async Task<IActionResult> IsBlocked(int userId)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+            int currentUserId = int.Parse(userIdClaim.Value);
+
+            var blocked = await _followService.IsBlocked(currentUserId, userId);
+            return Ok(new { userId, isBlocked = blocked });
+        }
+
+        // GET /api/follows/blocked
+        [Authorize]
+        [HttpGet("blocked")]
+        public async Task<IActionResult> GetBlockedUsers()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+            int currentUserId = int.Parse(userIdClaim.Value);
+
+            var blockedIds = await _followService.GetBlockedUsers(currentUserId);
+            return Ok(blockedIds);
+        }
+
+        // GET /api/follows/suggestions?count=5
+        [Authorize]
+        [HttpGet("suggestions")]
+        public async Task<IActionResult> GetSuggestions([FromQuery] int count = 5)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized();
+            int currentUserId = int.Parse(userIdClaim.Value);
+
+            var suggestions = await _followService.GetFollowSuggestions(currentUserId, count);
+            return Ok(suggestions);
         }
     }
 }

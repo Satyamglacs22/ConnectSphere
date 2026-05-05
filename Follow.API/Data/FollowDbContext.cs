@@ -8,6 +8,7 @@ namespace Follow.API.Data
         public FollowDbContext(DbContextOptions<FollowDbContext> options) : base(options) { }
 
         public DbSet<FollowEntity> Follows { get; set; }
+        public DbSet<BlockEntity> Blocks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,11 @@ namespace Follow.API.Data
             modelBuilder.Entity<FollowEntity>()
                 .Property(f => f.Status)
                 .HasDefaultValue("PENDING");
+
+            // Blocks
+            modelBuilder.Entity<BlockEntity>()
+                .HasIndex(b => new { b.BlockerId, b.BlockedId })
+                .IsUnique();
         }
     }
 }

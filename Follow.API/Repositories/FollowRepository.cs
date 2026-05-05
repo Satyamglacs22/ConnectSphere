@@ -109,5 +109,35 @@ namespace Follow.API.Repositories
                 .Select(f => f.FolloweeId)
                 .ToListAsync();
         }
+
+        // ── Blocks ──────────────────────────────────
+        public async Task<BlockEntity> Block(BlockEntity block)
+        {
+            _context.Blocks.Add(block);
+            await _context.SaveChangesAsync();
+            return block;
+        }
+
+        public async Task Unblock(int blockerId, int blockedId)
+        {
+            await _context.Blocks
+                .Where(b => b.BlockerId == blockerId && b.BlockedId == blockedId)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task<bool> IsBlocked(int blockerId, int blockedId)
+        {
+            return await _context.Blocks
+                .AnyAsync(b => (b.BlockerId == blockerId && b.BlockedId == blockedId) 
+                            || (b.BlockerId == blockedId && b.BlockedId == blockerId));
+        }
+
+        public async Task<IList<int>> GetBlockedUserIds(int userId)
+        {
+            return await _context.Blocks
+                .Where(b => b.BlockerId == userId)
+                .Select(b => b.BlockedId)
+                .ToListAsync();
+        }
     }
 }

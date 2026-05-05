@@ -10,13 +10,14 @@ namespace Follow.API.HttpClients
         }
 
         public async Task SendFollowNotification(
-            int targetId, int followerId, string type)
+            int targetId, int followerId, string type, int? followId = null)
         {
             var payload = new
             {
                 TargetId = targetId,
                 FollowerId = followerId,
-                Type = type  // NEW_FOLLOWER or FOLLOW_REQUEST
+                Type = type,  // NEW_FOLLOWER or FOLLOW_REQUEST
+                FollowId = followId
             };
 
             try
@@ -47,7 +48,18 @@ namespace Follow.API.HttpClients
             }
             catch
             {
-                // Notification failure should never break accept operation
+            }
+        }
+        public async Task ResolveFollowRequestNotification(int followId)
+        {
+            try
+            {
+                await _httpClient.DeleteAsync(
+                    $"/api/notifications/follow/{followId}");
+            }
+            catch
+            {
+                // Notification failure should never break follow operation
             }
         }
     }

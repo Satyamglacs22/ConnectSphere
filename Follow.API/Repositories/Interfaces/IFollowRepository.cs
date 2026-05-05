@@ -17,5 +17,11 @@ namespace Follow.API.Repositories.Interfaces
         Task DeleteByFollowId(int id);
         Task<IList<int>> FindFollowerIds(int userId);
         Task<IList<int>> FindFollowingIds(int userId);
+
+        // ── Blocks ──────────────────────────────────
+        Task<BlockEntity> Block(BlockEntity block);
+        Task Unblock(int blockerId, int blockedId);
+        Task<bool> IsBlocked(int blockerId, int blockedId);
+        Task<IList<int>> GetBlockedUserIds(int userId);
     }
 }
