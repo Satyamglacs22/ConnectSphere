@@ -167,8 +167,25 @@ namespace Notification.API.Controllers
                 await _notifService.SendFollowNotif(
                     dto.TargetId,
                     dto.FollowerId,
-                    dto.Type);
+                    dto.Type,
+                    dto.FollowId);
                 return Ok(new { message = "Follow notification sent." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // DELETE /api/notifications/follow/{followId}
+        // Called by Follow API when request is accepted/rejected
+        [HttpDelete("follow/{followId}")]
+        public async Task<IActionResult> ResolveFollowRequest(int followId)
+        {
+            try
+            {
+                await _notifService.ResolveFollowRequestNotification(followId);
+                return Ok(new { message = "Follow request notification resolved." });
             }
             catch (Exception ex)
             {

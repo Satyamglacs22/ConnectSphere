@@ -11,6 +11,8 @@ namespace Notification.API.Repositories.Interfaces
         Task MarkAllRead(int userId);
         Task MarkSingleRead(int notifId);
         Task DeleteByNotifId(int id);
+        Task DeleteByTargetAndType(int targetId, string type);
+        Task DeleteDuplicates(int recipientId, int actorId, int targetId, string type);
         Task<NotificationEntity> Create(NotificationEntity notif);
         Task<IList<NotificationEntity>> CreateBatch(
             IList<NotificationEntity> notifications);

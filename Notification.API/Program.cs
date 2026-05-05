@@ -8,6 +8,8 @@ using Notification.API.Repositories;
 using Notification.API.Repositories.Interfaces;
 using Notification.API.Services;
 using Notification.API.Services.Interfaces;
+using Notification.API.HttpClients;
+using Polly;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,16 @@ builder.Services.AddDbContext<NotificationDbContext>(opt =>
         .GetConnectionString("Default")));
 
 // ── Repositories & Services ────────────────────────────────────────────────
+builder.Services.AddHttpClient<AuthServiceClient>(client =>
+{
+    var url = builder.Configuration["Services:AuthAPI"];
+    if (string.IsNullOrEmpty(url)) url = "http://auth-api:5246"; // Fallback
+    client.BaseAddress = new Uri(url);
+})
+.AddTransientHttpErrorPolicy(policy =>
+    policy.WaitAndRetryAsync(3, attempt =>
+        TimeSpan.FromSeconds(Math.Pow(2, attempt))));
+
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
@@ -105,7 +117,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// ── Database Setup ────────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+    db.Database.EnsureCreated();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

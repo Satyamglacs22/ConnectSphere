@@ -68,6 +68,23 @@ namespace Notification.API.Repositories
                 .ExecuteDeleteAsync();
         }
 
+        public async Task DeleteByTargetAndType(int targetId, string type)
+        {
+            await _context.Notifications
+                .Where(n => n.TargetId == targetId && n.Type == type)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task DeleteDuplicates(int recipientId, int actorId, int targetId, string type)
+        {
+            await _context.Notifications
+                .Where(n => n.RecipientId == recipientId && 
+                            n.ActorId == actorId && 
+                            n.TargetId == targetId && 
+                            n.Type == type)
+                .ExecuteDeleteAsync();
+        }
+
         public async Task<NotificationEntity> Create(NotificationEntity notif)
         {
             _context.Notifications.Add(notif);

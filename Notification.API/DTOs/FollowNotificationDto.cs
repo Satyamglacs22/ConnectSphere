@@ -10,6 +10,8 @@ namespace Notification.API.DTOs
         [Required]
         public int FollowerId { get; set; }
 
+        public int? FollowId { get; set; }
+
         [Required]
         public string Type { get; set; } = string.Empty;
         // NEW_FOLLOWER, FOLLOW_REQUEST, FOLLOW_ACCEPTED

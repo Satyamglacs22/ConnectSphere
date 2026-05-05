@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Notification.API.DTOs;
 using Notification.API.Entities;
 
 namespace Notification.API.Services.Interfaces
@@ -19,7 +21,7 @@ namespace Notification.API.Services.Interfaces
             int commentAuthorId, int actorId, int commentId);
 
         Task SendFollowNotif(
-            int targetId, int followerId, string type);
+            int targetId, int followerId, string type, int? followId = null);
 
         Task SendMentionNotif(
             int mentionedId, int actorId, int postId);
@@ -28,8 +30,8 @@ namespace Notification.API.Services.Interfaces
             IList<int> userIds, string title, string message);
 
         // Read operations
-        Task<IList<NotificationEntity>> GetByRecipient(int userId);
-        Task<IList<NotificationEntity>> GetUnread(int userId);
+        Task<IList<NotificationResponseDto>> GetByRecipient(int userId);
+        Task<IList<NotificationResponseDto>> GetUnread(int userId);
         Task<int> GetUnreadCount(int userId);
 
         // Mark read operations
@@ -38,5 +40,6 @@ namespace Notification.API.Services.Interfaces
 
         // Delete
         Task DeleteNotif(int id);
+        Task ResolveFollowRequestNotification(int followId);
     }
 }
