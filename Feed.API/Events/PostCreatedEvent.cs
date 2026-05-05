@@ -1,4 +1,4 @@
-namespace Feed.API.Events
+namespace Post.API.Events
 {
     // Same contract as Post.API/Events/PostCreatedEvent.cs
     // Must match EXACTLY — same property names and types

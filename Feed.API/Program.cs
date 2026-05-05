@@ -162,7 +162,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// ── Database Setup ────────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FeedDbContext>();
+    db.Database.EnsureCreated();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

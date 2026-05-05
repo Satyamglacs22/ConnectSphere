@@ -1,7 +1,7 @@
 using Feed.API.Cache;
 using Feed.API.Data;
 using Feed.API.Entities;
-using Feed.API.Events;
+using Post.API.Events;
 using Feed.API.HttpClients;
 using MassTransit;
 
