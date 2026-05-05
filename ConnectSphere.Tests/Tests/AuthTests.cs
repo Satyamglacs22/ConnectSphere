@@ -1,47 +1,41 @@
 using ConnectSphere.Tests.Helpers;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
-using Xunit;
+using NUnit.Framework;
 
 namespace ConnectSphere.Tests.Tests
 {
+    [TestFixture]
     public class AuthTests
     {
-        private readonly ApiClient _client;
+        private ApiClient _client = null!;
 
-        public AuthTests()
+        [SetUp]
+        public void SetUp()
         {
             _client = new ApiClient();
         }
 
         // ── Test 1: Register ───────────────────────────────────────────────
-        [Fact]
+        [Test]
         public async Task Register_ValidUser_ReturnsSuccess()
         {
-            // Arrange
             var user = TestData.User1;
 
-            // Act
-            var response = await _client.PostAsync(
-                "/api/users/register", user);
+            var response = await _client.PostAsync("/api/users/register", user);
 
-            // Assert
-            response.StatusCode.Should().Be(
-                System.Net.HttpStatusCode.OK);
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var json = JObject.Parse(content);
-
+            var json = JObject.Parse(await response.Content.ReadAsStringAsync());
             json["userId"].Should().NotBeNull();
             json["userName"].Should().NotBeNull();
             json["email"].Should().NotBeNull();
         }
 
         // ── Test 2: Register Duplicate ─────────────────────────────────────
-        [Fact]
+        [Test]
         public async Task Register_DuplicateEmail_ReturnsBadRequest()
         {
-            // Arrange — register first time
             var user = new
             {
                 UserName = $"dupuser_{Guid.NewGuid():N}",
@@ -52,7 +46,6 @@ namespace ConnectSphere.Tests.Tests
 
             await _client.PostAsync("/api/users/register", user);
 
-            // Act — register again with same email
             var user2 = new
             {
                 UserName = $"dupuser2_{Guid.NewGuid():N}",
@@ -61,19 +54,15 @@ namespace ConnectSphere.Tests.Tests
                 Password = "Password123!"
             };
 
-            var response = await _client.PostAsync(
-                "/api/users/register", user2);
+            var response = await _client.PostAsync("/api/users/register", user2);
 
-            // Assert
-            response.StatusCode.Should().Be(
-                System.Net.HttpStatusCode.BadRequest);
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
         }
 
         // ── Test 3: Login ──────────────────────────────────────────────────
-        [Fact]
+        [Test]
         public async Task Login_ValidCredentials_ReturnsToken()
         {
-            // Arrange — register first
             var email = $"login_{Guid.NewGuid():N}@test.com";
             var user = new
             {
@@ -85,27 +74,21 @@ namespace ConnectSphere.Tests.Tests
 
             await _client.PostAsync("/api/users/register", user);
 
-            // Act
             var loginResponse = await _client.PostAsync(
                 "/api/users/login",
                 new { Email = email, Password = "Password123!" });
 
-            // Assert
-            loginResponse.StatusCode.Should().Be(
-                System.Net.HttpStatusCode.OK);
+            loginResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
-            var content = await loginResponse.Content.ReadAsStringAsync();
-            var json = JObject.Parse(content);
-
+            var json = JObject.Parse(await loginResponse.Content.ReadAsStringAsync());
             json["token"].Should().NotBeNull();
             json["token"]!.ToString().Should().NotBeEmpty();
         }
 
         // ── Test 4: Login Wrong Password ───────────────────────────────────
-        [Fact]
+        [Test]
         public async Task Login_WrongPassword_ReturnsUnauthorized()
         {
-            // Arrange
             var email = $"wrongpass_{Guid.NewGuid():N}@test.com";
             var user = new
             {
@@ -117,21 +100,17 @@ namespace ConnectSphere.Tests.Tests
 
             await _client.PostAsync("/api/users/register", user);
 
-            // Act
             var response = await _client.PostAsync(
                 "/api/users/login",
                 new { Email = email, Password = "WrongPassword!" });
 
-            // Assert
-            response.StatusCode.Should().Be(
-                System.Net.HttpStatusCode.Unauthorized);
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
         }
 
         // ── Test 5: Get User By Id ─────────────────────────────────────────
-        [Fact]
+        [Test]
         public async Task GetUser_ValidId_ReturnsUser()
         {
-            // Arrange — register and login
             var email = $"getuser_{Guid.NewGuid():N}@test.com";
             var user = new
             {
@@ -141,22 +120,15 @@ namespace ConnectSphere.Tests.Tests
                 Password = "Password123!"
             };
 
-            var registerResponse = await _client.PostAsync(
-                "/api/users/register", user);
-            var registerJson = JObject.Parse(
-                await registerResponse.Content.ReadAsStringAsync());
+            var registerResponse = await _client.PostAsync("/api/users/register", user);
+            var registerJson = JObject.Parse(await registerResponse.Content.ReadAsStringAsync());
             var userId = registerJson["userId"]!.ToString();
 
-            // Act
-            var response = await _client.GetAsync(
-                $"/api/users/{userId}");
+            var response = await _client.GetAsync($"/api/users/{userId}");
 
-            // Assert
-            response.StatusCode.Should().Be(
-                System.Net.HttpStatusCode.OK);
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
-            var content = JObject.Parse(
-                await response.Content.ReadAsStringAsync());
+            var content = JObject.Parse(await response.Content.ReadAsStringAsync());
             content["userId"].Should().NotBeNull();
         }
     }
