@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Comment.API.DTOs;
 using Comment.API.Entities;
@@ -42,6 +43,10 @@ namespace Comment.API.Services
 
             var created = await _repo.Create(comment);
 
+            // Fetch post to get the author
+            var post = await _postClient.GetPostById(dto.PostId);
+            int postAuthorId = post?.UserId ?? 0;
+
             // Increment CommentCount on Post API
             await _postClient.IncrementCommentCount(dto.PostId, +1);
 
@@ -49,47 +54,50 @@ namespace Comment.API.Services
             if (dto.ParentCommentId.HasValue)
                 await _repo.IncrementReplyCount(dto.ParentCommentId.Value, +1);
 
-            // Send comment notification to post author
-            await _notifClient.SendCommentNotification(
-                postAuthorId: dto.PostId,
-                actorId: dto.UserId,
-                postId: dto.PostId);
+            // Send comment notification to post author (NOT the postId)
+            if (postAuthorId > 0 && postAuthorId != dto.UserId)
+            {
+                await _notifClient.SendCommentNotification(
+                    postAuthorId: postAuthorId,
+                    actorId: dto.UserId,
+                    postId: dto.PostId);
+            }
 
             // Parse @mentions and send mention notifications
             await ParseAndSendMentions(dto.Content, dto.UserId, dto.PostId);
 
-            return MapToDto(created);
+            return await EnrichDto(created);
         }
 
         public async Task<CommentResponseDto?> GetCommentById(int id)
         {
             var comment = await _repo.FindByCommentId(id);
             if (comment == null) return null;
-            return MapToDto(comment);
+            return await EnrichDto(comment);
         }
 
         public async Task<IList<CommentResponseDto>> GetCommentsByPost(int postId)
         {
             var comments = await _repo.FindByPostId(postId);
-            return comments.Select(MapToDto).ToList();
+            return await EnrichList(comments);
         }
 
         public async Task<IList<CommentResponseDto>> GetTopLevelComments(int postId)
         {
             var comments = await _repo.FindTopLevelByPostId(postId);
-            return comments.Select(MapToDto).ToList();
+            return await EnrichList(comments);
         }
 
         public async Task<IList<CommentResponseDto>> GetReplies(int commentId)
         {
             var comments = await _repo.FindReplies(commentId);
-            return comments.Select(MapToDto).ToList();
+            return await EnrichList(comments);
         }
 
         public async Task<IList<CommentResponseDto>> GetCommentsByUser(int userId)
         {
             var comments = await _repo.FindByUserId(userId);
-            return comments.Select(MapToDto).ToList();
+            return await EnrichList(comments);
         }
 
         public async Task<CommentResponseDto> EditComment(
@@ -106,7 +114,7 @@ namespace Comment.API.Services
             comment.EditedAt = DateTime.UtcNow;
 
             var updated = await _repo.Update(comment);
-            return MapToDto(updated);
+            return await EnrichDto(updated);
         }
 
         public async Task DeleteComment(int id, int requestingUserId)
@@ -163,26 +171,49 @@ namespace Comment.API.Services
                 }
             }
         }
-
-        // Map entity to DTO — applies soft delete masking
-        private CommentResponseDto MapToDto(CommentEntity comment)
+        
+        // Internal helper to map and enrich DTO with user details
+        private async Task<CommentResponseDto> EnrichDto(CommentEntity comment)
         {
-            return new CommentResponseDto
+            var dto = new CommentResponseDto
             {
                 CommentId = comment.CommentId,
                 PostId = comment.PostId,
                 UserId = comment.UserId,
                 ParentCommentId = comment.ParentCommentId,
-                // Mask content if soft deleted
-                Content = comment.IsDeleted
-                    ? "This comment was deleted."
-                    : comment.Content,
+                Content = comment.Content,
                 LikeCount = comment.LikeCount,
                 ReplyCount = comment.ReplyCount,
                 IsEdited = comment.IsEdited,
                 CreatedAt = comment.CreatedAt,
-                EditedAt = comment.EditedAt
+                EditedAt = comment.EditedAt,
+                AuthorName = $"User {comment.UserId}", // Default
+                AuthorAvatarUrl = ""
             };
+
+            // Fetch actual name and avatar
+            var user = await _authClient.GetUserDetails(comment.UserId);
+            if (user != null)
+            {
+                var realName = !string.IsNullOrWhiteSpace(user.FullName) ? user.FullName : user.UserName;
+                if (!string.IsNullOrWhiteSpace(realName))
+                {
+                    dto.AuthorName = realName;
+                }
+                dto.AuthorAvatarUrl = user.AvatarUrl;
+            }
+
+            return dto;
+        }
+
+        private async Task<IList<CommentResponseDto>> EnrichList(IList<CommentEntity> comments)
+        {
+            var results = new List<CommentResponseDto>();
+            foreach (var c in comments)
+            {
+                results.Add(await EnrichDto(c));
+            }
+            return results;
         }
     }
 }

@@ -23,6 +23,10 @@ namespace Comment.API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
+                dto.UserId = int.Parse(userIdClaim.Value);
+
                 var comment = await _commentService.AddComment(dto);
                 return Ok(comment);
             }

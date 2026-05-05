@@ -76,11 +76,10 @@ namespace Comment.API.Repositories
 
         public async Task DeleteByCommentId(int id)
         {
+            // Hard delete
             await _context.Comments
                 .Where(c => c.CommentId == id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(c => c.IsDeleted, true)
-                    .SetProperty(c => c.Content, "This comment was deleted."));
+                .ExecuteDeleteAsync();
         }
 
         public async Task<CommentEntity> Create(CommentEntity comment)

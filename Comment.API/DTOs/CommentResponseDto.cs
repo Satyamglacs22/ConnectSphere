@@ -10,6 +10,10 @@ namespace Comment.API.DTOs
         // Masked if deleted
         public string Content { get; set; } = string.Empty;
 
+        // New fields for UI convenience
+        public string AuthorName { get; set; } = string.Empty;
+        public string AuthorAvatarUrl { get; set; } = string.Empty;
+
         public int LikeCount { get; set; }
         public int ReplyCount { get; set; }
         public bool IsEdited { get; set; }
