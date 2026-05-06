@@ -103,7 +103,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("Default")!)
+    .AddNpgSql(builder.Configuration.GetConnectionString("Default")!);
 
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
