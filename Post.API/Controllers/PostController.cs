@@ -11,10 +11,29 @@ namespace Post.API.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
+        private readonly IMediaService _mediaService;
 
-        public PostController(IPostService postService)
+        public PostController(IPostService postService, IMediaService mediaService)
         {
             _postService = postService;
+            _mediaService = mediaService;
+        }
+
+        // POST /api/posts/upload
+        [Authorize]
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadMedia(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded.");
+            try
+            {
+                var url = await _mediaService.UploadMedia(file);
+                return Ok(new { url });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
       

@@ -59,6 +59,7 @@ builder.Services.AddMassTransit(cfg =>
 // ── Repositories & Services ────────────────────────────────────────────────
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 // ── JWT Authentication ─────────────────────────────────────────────────────
 // Prevent ASP.NET from remapping JWT claim names
