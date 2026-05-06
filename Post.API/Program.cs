@@ -162,12 +162,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
     db.Database.EnsureCreated();
     
-    // Quick fix to add column if it doesn't exist (since EnsureCreated doesn't update schema)
-    try
-    {
-        db.Database.ExecuteSqlRaw("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Posts' AND column_name='AdditionalMediaUrls') THEN ALTER TABLE \"Posts\" ADD COLUMN \"AdditionalMediaUrls\" TEXT; END IF; END $$;");
-    }
-    catch { /* Ignore error if column exists */ }
+    // Tables will be created automatically
 }
 
 app.UseAuthentication();
