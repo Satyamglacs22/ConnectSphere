@@ -46,7 +46,7 @@ builder.Services.AddMassTransit(cfg =>
 {
     cfg.UsingRabbitMq((ctx, rabbitCfg) =>
     {
-        rabbitCfg.Host(builder.Configuration["RabbitMQ:Host"], h =>
+        rabbitCfg.Host(builder.Configuration["RabbitMQ:Host"], builder.Configuration["RabbitMQ:Username"], h =>
         {
             h.Username(builder.Configuration["RabbitMQ:Username"]!);
             h.Password(builder.Configuration["RabbitMQ:Password"]!);
@@ -165,10 +165,9 @@ using (var scope = app.Services.CreateScope())
     // Quick fix to add column if it doesn't exist (since EnsureCreated doesn't update schema)
     try
     {
-        db.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Posts') AND name = 'AdditionalMediaUrls') " +
-                                 "ALTER TABLE Posts ADD AdditionalMediaUrls NVARCHAR(MAX) NULL;");
+        db.Database.ExecuteSqlRaw("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Posts' AND column_name='AdditionalMediaUrls') THEN ALTER TABLE \"Posts\" ADD COLUMN \"AdditionalMediaUrls\" TEXT; END IF; END $$;");
     }
-    catch { /* Ignore error if column exists or table doesn't support it */ }
+    catch { /* Ignore error if column exists */ }
 }
 
 app.UseAuthentication();
