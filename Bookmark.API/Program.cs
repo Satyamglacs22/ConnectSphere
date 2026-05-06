@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ───────────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!);
+    .AddNpgSql(builder.Configuration.GetConnectionString("Default")!);
 
 builder.Services.AddDbContext<BookmarkDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));

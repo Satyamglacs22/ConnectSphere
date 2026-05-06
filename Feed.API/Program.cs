@@ -146,7 +146,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!)
+    .AddNpgSql(builder.Configuration.GetConnectionString("Default")!)
     .AddRedis(builder.Configuration["Redis:ConnectionString"]!);
 
 // ── Controllers ────────────────────────────────────────────────────────────
