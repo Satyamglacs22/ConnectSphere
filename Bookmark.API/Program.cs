@@ -12,8 +12,11 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ───────────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!);
+
 builder.Services.AddDbContext<BookmarkDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // ── Repositories & Services ────────────────────────────────────────────────
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();

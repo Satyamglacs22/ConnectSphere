@@ -30,8 +30,7 @@ builder.Host.UseSerilog();
 
 // ── Database ───────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<FeedDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration
-        .GetConnectionString("Default")));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // ── Redis ──────────────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -147,7 +146,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("Default")!)
+    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!)
     .AddRedis(builder.Configuration["Redis:ConnectionString"]!);
 
 // ── Controllers ────────────────────────────────────────────────────────────

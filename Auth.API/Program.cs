@@ -28,7 +28,7 @@ builder.Host.UseSerilog();
 
 // ── Database ───────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AuthDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // ── Repositories & Services ────────────────────────────────────────────────
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -95,7 +95,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("Default")!);
+    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!);
 
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();

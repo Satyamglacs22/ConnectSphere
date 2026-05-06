@@ -26,8 +26,7 @@ builder.Host.UseSerilog();
 
 // ── Database ───────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<NotificationDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration
-        .GetConnectionString("Default")));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // ── Repositories & Services ────────────────────────────────────────────────
 builder.Services.AddHttpClient<AuthServiceClient>(client =>
@@ -102,8 +101,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration
-        .GetConnectionString("Default")!);
+    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!);
 
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();

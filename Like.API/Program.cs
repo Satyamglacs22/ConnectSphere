@@ -26,7 +26,7 @@ builder.Host.UseSerilog();
 
 // ── Database ───────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<LikeDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // ── Typed HTTP Clients with Polly ──────────────────────────────────────────
 builder.Services.AddHttpClient<PostServiceClient>(client =>
@@ -104,7 +104,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ──────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("Default")!);
+    .AddNpgsql(builder.Configuration.GetConnectionString("Default")!);
 
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();

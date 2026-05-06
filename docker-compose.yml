@@ -2,16 +2,17 @@ version: "3.9"
 
 services:
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: connectsphere-sqlserver
+  postgres:
+    image: postgres:16
+    container_name: connectsphere-postgres
     environment:
-      SA_PASSWORD: "ConnectSphere@2026!"
-      ACCEPT_EULA: "Y"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ConnectSphere
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - connectsphere-network
     restart: always
