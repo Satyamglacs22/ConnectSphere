@@ -24,7 +24,9 @@ namespace Post.API.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> UploadMedia(IFormFile file)
         {
-            if (file == null || file.Length == 0) return BadRequest("No file uploaded.");
+            if (file == null) return BadRequest("No file provided in the request.");
+            if (file.Length == 0) return BadRequest("Uploaded file is empty (0 bytes).");
+            
             try
             {
                 var url = await _mediaService.UploadMedia(file);
@@ -32,7 +34,8 @@ namespace Post.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                // Return the actual exception message to diagnose Azure/Config issues
+                return BadRequest(new { message = $"Upload failed: {ex.Message}", details = ex.InnerException?.Message });
             }
         }
 

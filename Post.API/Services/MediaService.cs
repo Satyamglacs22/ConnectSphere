@@ -18,6 +18,11 @@ namespace Post.API.Services
             var connStr = _config["Azure:BlobConnectionString"];
             var containerName = _config["Azure:PostContainer"] ?? "posts";
 
+            if (string.IsNullOrEmpty(connStr))
+            {
+                throw new Exception("Azure:BlobConnectionString is missing in configuration.");
+            }
+
             var blobClient = new BlobContainerClient(connStr, containerName);
             await blobClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
