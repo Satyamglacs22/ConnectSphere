@@ -140,6 +140,11 @@ builder.Services.AddHealthChecks()
 // ── Controllers ────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
+});
+
 // ── Max Request Body Size (e.g. 100MB for Video) ───────────────────────────
 builder.WebHost.ConfigureKestrel(options =>
 {
