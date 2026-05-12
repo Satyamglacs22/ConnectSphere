@@ -83,10 +83,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<BookmarkDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Bookmarks\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
+        Console.WriteLine("✅ Bookmark Database Migrated Successfully");
     }
-    catch (Exception) { }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Bookmark Database Migration handled: {ex.Message}");
+    }
 }
 
 app.UseAuthentication();

@@ -118,10 +118,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Notifications\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
+        Console.WriteLine("✅ Notification Database Migrated Successfully");
     }
-    catch (Exception) { }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Notification Database Migration handled: {ex.Message}");
+    }
 }
 
 app.UseAuthentication();

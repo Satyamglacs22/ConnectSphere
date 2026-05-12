@@ -121,10 +121,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<LikeDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Likes\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
+        Console.WriteLine("✅ Like Database Migrated Successfully");
     }
-    catch (Exception) { }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Like Database Migration handled: {ex.Message}");
+    }
 }
 
 app.UseAuthentication();

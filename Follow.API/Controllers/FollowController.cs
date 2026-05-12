@@ -94,16 +94,30 @@ namespace Follow.API.Controllers
         [HttpGet("{userId}/followers")]
         public async Task<IActionResult> GetFollowers(int userId)
         {
-            var followers = await _followService.GetFollowers(userId);
-            return Ok(followers);
+            try
+            {
+                var followers = await _followService.GetFollowers(userId);
+                return Ok(followers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving followers", details = ex.Message });
+            }
         }
 
         // GET /api/follows/{userId}/following
         [HttpGet("{userId}/following")]
         public async Task<IActionResult> GetFollowing(int userId)
         {
-            var following = await _followService.GetFollowing(userId);
-            return Ok(following);
+            try
+            {
+                var following = await _followService.GetFollowing(userId);
+                return Ok(following);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving following", details = ex.Message });
+            }
         }
 
         // GET /api/follows/{userId}/pending
@@ -111,8 +125,15 @@ namespace Follow.API.Controllers
         [HttpGet("{userId}/pending")]
         public async Task<IActionResult> GetPending(int userId)
         {
-            var pending = await _followService.GetPendingRequests(userId);
-            return Ok(pending);
+            try
+            {
+                var pending = await _followService.GetPendingRequests(userId);
+                return Ok(pending);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving pending requests", details = ex.Message });
+            }
         }
 
         // GET /api/follows/isFollowing/{followerId}/{followeeId}
@@ -231,12 +252,19 @@ namespace Follow.API.Controllers
         [HttpGet("suggestions")]
         public async Task<IActionResult> GetSuggestions([FromQuery] int count = 5)
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized();
-            int currentUserId = int.Parse(userIdClaim.Value);
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (userIdClaim == null) return Unauthorized();
+                int currentUserId = int.Parse(userIdClaim.Value);
 
-            var suggestions = await _followService.GetFollowSuggestions(currentUserId, count);
-            return Ok(suggestions);
+                var suggestions = await _followService.GetFollowSuggestions(currentUserId, count);
+                return Ok(suggestions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving follow suggestions", details = ex.Message });
+            }
         }
     }
 }

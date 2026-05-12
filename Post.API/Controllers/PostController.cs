@@ -79,33 +79,61 @@ namespace Post.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var post = await _postService.GetPostById(id);
-            if (post == null) return NotFound();
-            return Ok(post);
+            try
+            {
+                var post = await _postService.GetPostById(id);
+                if (post == null) return NotFound();
+                return Ok(post);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving post", details = ex.Message });
+            }
         }
 
         // GET /api/posts/user/{userId}
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var posts = await _postService.GetPostsByUser(userId, page, pageSize);
-            return Ok(posts);
+            try
+            {
+                var posts = await _postService.GetPostsByUser(userId, page, pageSize);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving user posts", details = ex.Message });
+            }
         }
 
         // GET /api/posts/public
         [HttpGet("public")]
         public async Task<IActionResult> GetPublic()
         {
-            var posts = await _postService.GetPublicPosts();
-            return Ok(posts);
+            try
+            {
+                var posts = await _postService.GetPublicPosts();
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving public posts", details = ex.Message });
+            }
         }
 
         // GET /api/posts/hashtag/{tag}
         [HttpGet("hashtag/{tag}")]
         public async Task<IActionResult> GetByHashtag(string tag)
         {
-            var posts = await _postService.GetByHashtag(tag);
-            return Ok(posts);
+            try
+            {
+                var posts = await _postService.GetByHashtag(tag);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving posts by hashtag", details = ex.Message });
+            }
         }
 
         // GET /api/posts/search?q=
@@ -113,16 +141,30 @@ namespace Post.API.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string q)
         {
-            var posts = await _postService.SearchPosts(q);
-            return Ok(posts);
+            try
+            {
+                var posts = await _postService.SearchPosts(q);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error searching posts", details = ex.Message });
+            }
         }
 
         // GET /api/posts/trending?topN=10
         [HttpGet("trending")]
         public async Task<IActionResult> GetTrending([FromQuery] int topN = 10)
         {
-            var posts = await _postService.GetTrendingPosts(topN);
-            return Ok(posts);
+            try
+            {
+                var posts = await _postService.GetTrendingPosts(topN);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving trending posts", details = ex.Message });
+            }
         }
 
         // PUT /api/posts/{id}

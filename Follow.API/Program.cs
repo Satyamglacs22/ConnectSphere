@@ -120,10 +120,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<FollowDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Follows\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
+        Console.WriteLine("✅ Follow Database Migrated Successfully");
     }
-    catch (Exception) { }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Follow Database Migration handled: {ex.Message}");
+    }
 }
 
 app.UseAuthentication();

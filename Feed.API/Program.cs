@@ -163,10 +163,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<FeedDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"UserFeeds\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
+        Console.WriteLine("✅ Feed Database Migrated Successfully");
     }
-    catch (Exception) { }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Feed Database Migration handled: {ex.Message}");
+    }
 }
 
 app.UseAuthentication();

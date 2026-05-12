@@ -166,15 +166,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
     try
     {
-        // Drop conflicting tables ONLY if we are in this broken state
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"AuditLogs\", \"Posts\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
-        Console.WriteLine("✅ Database Migrated Successfully");
+        Console.WriteLine("✅ Post Database Migrated Successfully");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"⚠️ Database Migration handled: {ex.Message}");
-        // If it's just 'already exists', we can safely continue
+        Console.WriteLine($"⚠️ Post Database Migration handled: {ex.Message}");
     }
 }
 
