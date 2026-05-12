@@ -112,6 +112,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    db.Database.EnsureDeleted();
     db.Database.Migrate();
 }
 

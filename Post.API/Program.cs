@@ -164,6 +164,8 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
+    // Clean up partial state from previous failed attempts
+    db.Database.EnsureDeleted(); 
     db.Database.Migrate();
 }
 
