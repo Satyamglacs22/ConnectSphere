@@ -77,10 +77,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateLifetime = true
         };
 
@@ -164,9 +162,8 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
-    db.Database.EnsureCreated();
-    
-    // Tables will be created automatically
+    // Use Migrate() instead of EnsureCreated() for production
+    db.Database.Migrate();
 }
 
 app.UseAuthentication();
