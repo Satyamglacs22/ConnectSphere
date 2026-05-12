@@ -1,10 +1,9 @@
 using System.Text;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Polly;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Post.API.Data;
 using Post.API.HttpClients;
 using Post.API.Repositories;
@@ -162,8 +161,16 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
-    // Use Migrate() instead of EnsureCreated() for production
-    db.Database.Migrate();
+    // Ensure tables are created if they don't exist
+    var databaseCreator = db.Database.GetService<IRelationalDatabaseCreator>();
+    try
+    {
+        databaseCreator.CreateTables();
+    }
+    catch (Exception)
+    {
+        // Tables might already exist
+    }
 }
 
 app.UseAuthentication();

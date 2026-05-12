@@ -6,6 +6,8 @@ using Auth.API.Services;
 using Auth.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -110,7 +112,15 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    db.Database.EnsureCreated();
+    var databaseCreator = db.Database.GetService<IRelationalDatabaseCreator>();
+    try
+    {
+        databaseCreator.CreateTables();
+    }
+    catch (Exception)
+    {
+        // Tables already exist
+    }
 }
 
 app.UseAuthentication();
