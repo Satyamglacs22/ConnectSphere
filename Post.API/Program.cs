@@ -164,10 +164,10 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
-    // Drop existing conflicting tables to allow fresh migration
-    db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"AuditLogs\", \"Posts\", \"__EFMigrationsHistory\" CASCADE;");
     db.Database.Migrate();
 }
+
+Console.WriteLine($"JWT Configuration: Key length = {builder.Configuration["Jwt:Key"]?.Length ?? 0}");
 
 app.UseAuthentication();
 app.UseAuthorization();
