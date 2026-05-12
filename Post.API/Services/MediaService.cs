@@ -24,7 +24,8 @@ namespace Post.API.Services
             }
 
             var blobClient = new BlobContainerClient(connStr, containerName);
-            await blobClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+            // Don't force public access if account policy forbids it
+            await blobClient.CreateIfNotExistsAsync(PublicAccessType.None);
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var blob = blobClient.GetBlobClient(fileName);

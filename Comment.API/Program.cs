@@ -126,7 +126,12 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CommentDbContext>();
-    db.Database.EnsureCreated();
+    try
+    {
+        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Comments\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
+        db.Database.Migrate();
+    }
+    catch (Exception) { }
 }
 
 app.UseAuthentication();
