@@ -112,11 +112,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    var databaseCreator = db.Database.GetService<IRelationalDatabaseCreator>();
-    if (!databaseCreator.HasTables())
-    {
-        databaseCreator.CreateTables();
-    }
+    db.Database.Migrate();
 }
 
 app.UseAuthentication();
