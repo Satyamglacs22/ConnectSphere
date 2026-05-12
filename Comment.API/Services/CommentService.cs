@@ -47,12 +47,16 @@ namespace Comment.API.Services
             var post = await _postClient.GetPostById(dto.PostId);
             int postAuthorId = post?.UserId ?? 0;
 
-            // Increment CommentCount on Post API
-            await _postClient.IncrementCommentCount(dto.PostId, +1);
-
-            // If it's a reply, increment ReplyCount on parent comment
-            if (dto.ParentCommentId.HasValue)
+            // Increment CommentCount on Post API ONLY if it's a top-level comment
+            if (!dto.ParentCommentId.HasValue)
+            {
+                await _postClient.IncrementCommentCount(dto.PostId, +1);
+            }
+            else
+            {
+                // If it's a reply, increment ReplyCount on parent comment
                 await _repo.IncrementReplyCount(dto.ParentCommentId.Value, +1);
+            }
 
             // Send comment notification to post author (NOT the postId)
             if (postAuthorId > 0 && postAuthorId != dto.UserId)
@@ -128,8 +132,11 @@ namespace Comment.API.Services
             // Soft delete — content masked, thread structure preserved
             await _repo.DeleteByCommentId(id);
 
-            // Decrement CommentCount on Post API
-            await _postClient.IncrementCommentCount(comment.PostId, -1);
+            // Decrement CommentCount on Post API ONLY if it was a top-level comment
+            if (!comment.ParentCommentId.HasValue)
+            {
+                await _postClient.IncrementCommentCount(comment.PostId, -1);
+            }
         }
 
         public async Task<int> GetCommentCount(int postId)
