@@ -114,7 +114,6 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"Users\", \"AuditLogs\", \"__EFMigrationsHistory\" CASCADE;");
         db.Database.Migrate();
         Console.WriteLine("✅ Auth Database Migrated Successfully");
     }
