@@ -113,13 +113,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     var databaseCreator = db.Database.GetService<IRelationalDatabaseCreator>();
-    try
+    if (!databaseCreator.HasTables())
     {
         databaseCreator.CreateTables();
-    }
-    catch (Exception)
-    {
-        // Tables already exist
     }
 }
 

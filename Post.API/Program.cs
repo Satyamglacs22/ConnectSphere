@@ -166,13 +166,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<PostDbContext>();
     // Ensure tables are created if they don't exist
     var databaseCreator = db.Database.GetService<IRelationalDatabaseCreator>();
-    try
+    if (!databaseCreator.HasTables())
     {
         databaseCreator.CreateTables();
-    }
-    catch (Exception)
-    {
-        // Tables might already exist
     }
 }
 
