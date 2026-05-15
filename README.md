@@ -28,12 +28,13 @@
 - [Tech Stack](#-tech-stack)
 - [Architecture Overview](#-system-architecture)
 - [UML Diagrams](#-uml-diagrams)
-  - [System Architecture](#1-system-architecture-diagram)
-  - [Entity Class Diagram](#2-entity-class-diagram)
-  - [Post Creation Sequence](#3-post-creation--fan-out-flow)
-  - [Like Flow Sequence](#4-like-a-post-flow)
-  - [Angular Component Diagram](#5-angular-frontend-component-diagram)
-  - [Inter-Service Communication](#6-inter-service-communication-map)
+  - [Use Case Diagram](#1-use-case-diagram)
+  - [System Architecture](#2-system-architecture-diagram)
+  - [Entity Class Diagram](#3-entity-class-diagram)
+  - [Post Creation Sequence](#4-post-creation--fan-out-flow)
+  - [Like Flow Sequence](#5-like-a-post-flow)
+  - [Angular Component Diagram](#6-angular-frontend-component-diagram)
+  - [Inter-Service Communication](#7-inter-service-communication-map)
 - [Microservices Overview](#-microservices-overview)
 - [Core Features](#-core-features)
 - [Database Schema](#-database-schema)
@@ -88,7 +89,185 @@ ConnectSphere follows a **Microservices Architecture** with these core principle
 
 ## 📐 UML Diagrams
 
-### 1. System Architecture Diagram
+### 1. Use Case Diagram
+
+> All actors and use cases across every module of ConnectSphere
+
+```mermaid
+graph LR
+    GUEST(["👤 Guest"])
+    USER(["👤 Registered User"])
+    SYSTEM(["⚙️ System\nBackground"])
+
+    subgraph UC["«system» ConnectSphere — Social Media Platform"]
+
+        subgraph AUTH["🔐 Authentication"]
+            UC1["Register Account"]
+            UC2["Login / Get JWT"]
+            UC3["Logout"]
+            UC4["Change Password"]
+            UC5["Toggle Privacy\nPublic / Private"]
+            UC6["Deactivate Account"]
+        end
+
+        subgraph PROFILE["👤 Profile Management"]
+            UC7["View Profile"]
+            UC8["Edit Profile\nbio, full name"]
+            UC9["Upload Avatar"]
+            UC10["Search Users"]
+        end
+
+        subgraph POSTS["📝 Post Management"]
+            UC11["Create Post\ntext, hashtags, visibility"]
+            UC12["Upload Multiple Images\nCarousel"]
+            UC13["Edit Post"]
+            UC14["Delete Post"]
+            UC15["Search Posts / Hashtags"]
+            UC16["View Trending Posts"]
+        end
+
+        subgraph FEED["📰 Feed"]
+            UC17["View Personalized Feed"]
+            UC18["See Unseen Posts Banner"]
+            UC19["Refresh Feed"]
+            UC20["Load More\nInfinite Scroll"]
+        end
+
+        subgraph SOCIAL["❤️ Social Interactions"]
+            UC21["Like / Unlike Post"]
+            UC22["Like / Unlike Comment"]
+            UC23["Add Comment"]
+            UC24["Reply to Comment"]
+            UC25["Edit Comment"]
+            UC26["Delete Comment"]
+            UC27["Bookmark / Unbookmark Post"]
+            UC28["View Bookmarks"]
+        end
+
+        subgraph FOLLOW["👥 Follow System"]
+            UC29["Follow Public User\nInstant"]
+            UC30["Follow Private User\nPending Approval"]
+            UC31["Accept / Reject\nFollow Request"]
+            UC32["Unfollow User"]
+            UC33["View Followers / Following"]
+            UC34["View Mutual Followers"]
+            UC35["View Follow Suggestions"]
+            UC36["Block / Unblock User"]
+        end
+
+        subgraph NOTIF["🔔 Notifications"]
+            UC37["View All Notifications"]
+            UC38["Mark Single as Read"]
+            UC39["Mark All as Read"]
+            UC40["Delete Notification"]
+        end
+
+        subgraph SYS_AUTO["⚙️ System Automation"]
+            UC41["Send Like Notification"]
+            UC42["Send Comment Notification"]
+            UC43["Send Follow Notification"]
+            UC44["Fan-Out Feed\nvia RabbitMQ"]
+            UC45["Invalidate Redis Cache"]
+            UC46["Increment Post Count"]
+            UC47["Increment Like Count"]
+            UC48["Increment Comment Count"]
+        end
+
+    end
+
+    %% Guest
+    GUEST --> UC1 & UC2
+    GUEST --> UC7 & UC10
+    GUEST --> UC15 & UC16
+
+    %% Registered User
+    USER --> UC3 & UC4 & UC5 & UC6
+    USER --> UC7 & UC8 & UC9 & UC10
+    USER --> UC11 & UC12 & UC13 & UC14 & UC15 & UC16
+    USER --> UC17 & UC18 & UC19 & UC20
+    USER --> UC21 & UC22 & UC23 & UC24 & UC25 & UC26 & UC27 & UC28
+    USER --> UC29 & UC30 & UC31 & UC32 & UC33 & UC34 & UC35 & UC36
+    USER --> UC37 & UC38 & UC39 & UC40
+
+    %% System triggers
+    SYSTEM --> UC41 & UC42 & UC43
+    SYSTEM --> UC44 & UC45
+    SYSTEM --> UC46 & UC47 & UC48
+
+    %% Styling — Actors
+    style GUEST fill:#1565C0,color:#fff,stroke:#1565C0
+    style USER fill:#2E7D32,color:#fff,stroke:#2E7D32
+    style SYSTEM fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+
+    %% Styling — Auth
+    style UC1 fill:#1976D2,color:#fff,stroke:#1976D2
+    style UC2 fill:#1976D2,color:#fff,stroke:#1976D2
+    style UC3 fill:#1976D2,color:#fff,stroke:#1976D2
+    style UC4 fill:#1976D2,color:#fff,stroke:#1976D2
+    style UC5 fill:#1976D2,color:#fff,stroke:#1976D2
+    style UC6 fill:#1976D2,color:#fff,stroke:#1976D2
+
+    %% Styling — Profile
+    style UC7 fill:#00838F,color:#fff,stroke:#00838F
+    style UC8 fill:#00838F,color:#fff,stroke:#00838F
+    style UC9 fill:#00838F,color:#fff,stroke:#00838F
+    style UC10 fill:#00838F,color:#fff,stroke:#00838F
+
+    %% Styling — Posts
+    style UC11 fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style UC12 fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style UC13 fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style UC14 fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style UC15 fill:#4f46e5,color:#fff,stroke:#4f46e5
+    style UC16 fill:#4f46e5,color:#fff,stroke:#4f46e5
+
+    %% Styling — Feed
+    style UC17 fill:#d97706,color:#fff,stroke:#d97706
+    style UC18 fill:#d97706,color:#fff,stroke:#d97706
+    style UC19 fill:#d97706,color:#fff,stroke:#d97706
+    style UC20 fill:#d97706,color:#fff,stroke:#d97706
+
+    %% Styling — Social
+    style UC21 fill:#dc2626,color:#fff,stroke:#dc2626
+    style UC22 fill:#dc2626,color:#fff,stroke:#dc2626
+    style UC23 fill:#7c3aed,color:#fff,stroke:#7c3aed
+    style UC24 fill:#7c3aed,color:#fff,stroke:#7c3aed
+    style UC25 fill:#7c3aed,color:#fff,stroke:#7c3aed
+    style UC26 fill:#7c3aed,color:#fff,stroke:#7c3aed
+    style UC27 fill:#0f766e,color:#fff,stroke:#0f766e
+    style UC28 fill:#0f766e,color:#fff,stroke:#0f766e
+
+    %% Styling — Follow
+    style UC29 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC30 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC31 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC32 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC33 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC34 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC35 fill:#0284c7,color:#fff,stroke:#0284c7
+    style UC36 fill:#0284c7,color:#fff,stroke:#0284c7
+
+    %% Styling — Notifications
+    style UC37 fill:#db2777,color:#fff,stroke:#db2777
+    style UC38 fill:#db2777,color:#fff,stroke:#db2777
+    style UC39 fill:#db2777,color:#fff,stroke:#db2777
+    style UC40 fill:#db2777,color:#fff,stroke:#db2777
+
+    %% Styling — System
+    style UC41 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC42 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC43 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC44 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC45 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC46 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC47 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+    style UC48 fill:#6A1B9A,color:#fff,stroke:#6A1B9A
+```
+
+---
+
+### 2. System Architecture Diagram
+
 
 > Full deployment view — Client → API Gateway → Microservices → Infrastructure
 
@@ -159,7 +338,7 @@ graph TB
 
 ---
 
-### 2. Entity Class Diagram
+### 3. Entity Class Diagram
 
 > Domain model — all entities, fields, types, and cross-service relationships
 
@@ -303,7 +482,7 @@ classDiagram
 
 ---
 
-### 3. Post Creation — Fan-Out Flow
+### 4. Post Creation — Fan-Out Flow
 
 > Sequence diagram — how a post propagates to all followers' feeds asynchronously
 
@@ -346,7 +525,7 @@ sequenceDiagram
 
 ---
 
-### 4. Like a Post Flow
+### 5. Like a Post Flow
 
 > Sequence diagram — toggle like with unique-constraint check and notification dispatch
 
@@ -385,7 +564,7 @@ sequenceDiagram
 
 ---
 
-### 5. Angular Frontend Component Diagram
+### 6. Angular Frontend Component Diagram
 
 > Guards, interceptors, services, and all lazy-loaded route components
 
@@ -467,7 +646,7 @@ graph LR
 
 ---
 
-### 6. Inter-Service Communication Map
+### 7. Inter-Service Communication Map
 
 > All synchronous HTTP calls and async RabbitMQ events between services
 
